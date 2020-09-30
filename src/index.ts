@@ -1,39 +1,39 @@
 import express from 'express';
-import path from 'path';
-import exphbs from 'express-handlebars';
 import methodOverride from 'method-override';
-
-// Routes
-import IndexRoutes from './routes';
-import BooksRoutes from './routes/books';
-
+import bodyParser from 'body-parser';
+import UpLoadImageRouter from './routes/upLoadImage'
+import * as dotenv from 'dotenv';
+dotenv.config();
 // Initializations
 const app = express();
-require('./database');
 
 // settings
 app.set('port', process.env.PORT || 4000);
-app.set('views', path.join(__dirname, 'views'));
-app.engine('.hbs', exphbs({
-    extname: '.hbs',
-    defaultLayout: 'main',
-    layoutsDir: path.join(app.get('views'), 'layouts'),
-    partialsDir: path.join(app.get('views'), 'partials'),
-    helpers: require('./lib/helpers')
-}));
-app.set('view engine', '.hbs');
 
 // middlewares
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(methodOverride());
 
-// Routes
-app.use(IndexRoutes);
-app.use('/books', BooksRoutes);
+app.use(function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+    // allow preflight
+    if (req.method === 'OPTIONS') {
+        res.send(200);
+    } else {
+        next();
+}})
 
-// Static files
-app.use(express.static(path.join(__dirname, 'public')));
+// Routes
+
+
+app.use('/upLoadImage',UpLoadImageRouter);
+// // Static files
+// app.use(express.static(path.join(__dirname, 'public')));
 
 // Starting the Server
 app.listen(app.get('port'), () => {
